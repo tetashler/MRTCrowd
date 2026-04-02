@@ -26,7 +26,7 @@ export const LineScreen = ({ lineCode, onBack }: LineScreenProps) => {
     else setLoading(true);
 
     try {
-      const response = await fetch(`/api/lta/PCDRealTime?TrainLine=${lineCode}`);
+      const response = await fetch(`/api/lta?endpoint=PCDRealTime&TrainLine=${lineCode}`);
       const data: CrowdDataResponse = await response.json();
 
       const newCrowdData = new Map<string, 'l' | 'm' | 'h'>();

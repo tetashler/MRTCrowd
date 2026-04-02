@@ -17,7 +17,7 @@ export const DisruptionBanner = () => {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const response = await fetch('/api/lta/TrainServiceAlerts');
+        const response = await fetch(`/api/lta?endpoint=PCDRealTime&TrainLine=${lineCode}`);
         const data = await response.json();
         // data.value is an object, not an array
         setAlerts(data.value || null);

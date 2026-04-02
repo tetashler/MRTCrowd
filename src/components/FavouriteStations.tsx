@@ -29,7 +29,7 @@ export const FavouriteStations = ({ onUpdate }: { onUpdate?: () => void }) => {
       const allData = new Map<string, 'l' | 'm' | 'h'>();
 
       for (const lineCode of uniqueLines) {
-        const response = await fetch(`/api/lta/PCDRealTime?TrainLine=${lineCode}`);
+        const response = await fetch(`/api/lta?endpoint=PCDRealTime&TrainLine=${lineCode}`);
         const data: CrowdDataResponse = await response.json();
 
         if (data.value) {
