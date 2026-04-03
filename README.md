@@ -1,4 +1,4 @@
-# MRTLeh - Singapore MRT Companion
+# MRTCrowd - Singapore MRT Companion
 
 A mobile-first web app for real-time Singapore MRT crowd levels and service alerts.
 

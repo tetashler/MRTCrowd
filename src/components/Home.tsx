@@ -15,7 +15,7 @@ export const Home = ({ onSelectLine }: HomeProps) => {
     <div className="min-h-screen bg-[#0D0D0D] text-white">
       <div className="max-w-md mx-auto p-4">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">MRTLeh</h1>
+          <h1 className="text-3xl font-bold">MRTCrowd</h1>
           <p className="text-gray-400 text-sm mt-1">Live crowd levels · Singapore MRT</p>
         </div>
 
