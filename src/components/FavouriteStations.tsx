@@ -3,6 +3,7 @@ import { Star, X } from 'lucide-react';
 import { getFavourites, removeFavourite, Favourite } from '../utils/favourites';
 import { getStationName, getLineColor } from '../data/stations';
 import { CrowdDataResponse } from '../types/api';
+import { useTheme } from '../context/ThemeContext';
 
 const getCrowdBadge = (level: 'l' | 'm' | 'h') => {
   switch (level) {
@@ -18,10 +19,13 @@ const getCrowdBadge = (level: 'l' | 'm' | 'h') => {
 export const FavouriteStations = ({ onUpdate }: { onUpdate?: () => void }) => {
   const [favourites, setFavourites] = useState<Favourite[]>([]);
   const [crowdData, setCrowdData] = useState<Map<string, 'l' | 'm' | 'h'>>(new Map());
+  const { isDark } = useTheme();
 
-  const loadFavourites = () => {
-    setFavourites(getFavourites());
-  };
+  const cardBg = isDark ? '#1A1A1A' : '#FFFFFF';
+  const textPrimary = isDark ? '#FFFFFF' : '#111111';
+  const textSecondary = isDark ? '#9CA3AF' : '#6B7280';
+
+  const loadFavourites = () => setFavourites(getFavourites());
 
   const fetchCrowdData = async () => {
     try {
@@ -31,7 +35,6 @@ export const FavouriteStations = ({ onUpdate }: { onUpdate?: () => void }) => {
       for (const lineCode of uniqueLines) {
         const response = await fetch(`/api/lta?endpoint=PCDRealTime&TrainLine=${lineCode}`);
         const data: CrowdDataResponse = await response.json();
-
         if (data.value) {
           data.value.forEach(station => {
             allData.set(station.Station, station.CrowdLevel);
@@ -45,9 +48,7 @@ export const FavouriteStations = ({ onUpdate }: { onUpdate?: () => void }) => {
     }
   };
 
-  useEffect(() => {
-    loadFavourites();
-  }, []);
+  useEffect(() => { loadFavourites(); }, []);
 
   useEffect(() => {
     if (favourites.length > 0) {
@@ -63,15 +64,13 @@ export const FavouriteStations = ({ onUpdate }: { onUpdate?: () => void }) => {
     onUpdate?.();
   };
 
-  if (favourites.length === 0) {
-    return null;
-  }
+  if (favourites.length === 0) return null;
 
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-        <h2 className="text-white font-semibold text-lg">Favourites</h2>
+        <h2 className="font-semibold text-lg" style={{ color: textPrimary }}>Favourites</h2>
       </div>
       <div className="space-y-2">
         {favourites.map(fav => {
@@ -82,12 +81,14 @@ export const FavouriteStations = ({ onUpdate }: { onUpdate?: () => void }) => {
           return (
             <div
               key={fav.stationCode}
-              className="bg-[#1A1A1A] rounded-lg p-3 flex items-center gap-3"
-              style={{ borderLeft: `3px solid ${lineColor}` }}
+              className="rounded-lg p-3 flex items-center gap-3 transition-colors duration-300"
+              style={{ backgroundColor: cardBg, borderLeft: `3px solid ${lineColor}` }}
             >
               <div className="flex-1">
-                <div className="text-white font-medium">{getStationName(fav.stationCode)}</div>
-                <div className="text-gray-400 text-sm">{fav.stationCode}</div>
+                <div className="font-medium" style={{ color: textPrimary }}>
+                  {getStationName(fav.stationCode)}
+                </div>
+                <div className="text-sm" style={{ color: textSecondary }}>{fav.stationCode}</div>
               </div>
               {badge && (
                 <div className={`px-2 py-1 rounded text-xs border ${badge.color}`}>
@@ -96,7 +97,8 @@ export const FavouriteStations = ({ onUpdate }: { onUpdate?: () => void }) => {
               )}
               <button
                 onClick={() => handleRemove(fav.stationCode)}
-                className="text-gray-400 hover:text-white transition-colors"
+                style={{ color: textSecondary }}
+                className="hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>

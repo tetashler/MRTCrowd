@@ -17,9 +17,8 @@ export const DisruptionBanner = () => {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const response = await fetch(`/api/lta?endpoint=PCDRealTime&TrainLine=${lineCode}`);
+        const response = await fetch('/api/lta?endpoint=TrainServiceAlerts');
         const data = await response.json();
-        // data.value is an object, not an array
         setAlerts(data.value || null);
       } catch (error) {
         console.error('Failed to fetch alerts:', error);
@@ -44,7 +43,7 @@ export const DisruptionBanner = () => {
         <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
         <div className="flex-1">
           {alerts.Message.map((msg, idx) => (
-            <p key={idx} className="text-red-200 text-sm leading-relaxed">
+            <p key={idx} className="text-red-400 text-sm leading-relaxed">
               {msg.Content}
             </p>
           ))}

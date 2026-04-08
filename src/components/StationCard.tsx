@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react';
 import { getStationName } from '../data/stations';
+import { useTheme } from '../context/ThemeContext';
 
 interface StationCardProps {
   stationCode: string;
@@ -27,32 +28,36 @@ export const StationCard = ({
   isFavourite,
   onToggleFavourite,
 }: StationCardProps) => {
+  const { isDark } = useTheme();
   const badge = crowdLevel ? getCrowdBadge(crowdLevel) : null;
+
+  const cardBg = isDark ? '#1A1A1A' : '#FFFFFF';
+  const textPrimary = isDark ? '#FFFFFF' : '#111111';
+  const textSecondary = isDark ? '#9CA3AF' : '#6B7280';
 
   return (
     <div
-      className="bg-[#1A1A1A] rounded-lg p-4 flex items-center gap-3"
-      style={{ borderLeft: `3px solid ${lineColor}` }}
+      className="rounded-lg p-4 flex items-center gap-3 transition-colors duration-300"
+      style={{ backgroundColor: cardBg, borderLeft: `3px solid ${lineColor}` }}
     >
       <div className="flex-1">
-        <h3 className="text-white font-semibold text-lg">{getStationName(stationCode)}</h3>
-        <p className="text-gray-400 text-sm">{stationCode}</p>
+        <h3 className="font-semibold text-lg" style={{ color: textPrimary }}>
+          {getStationName(stationCode)}
+        </h3>
+        <p className="text-sm" style={{ color: textSecondary }}>{stationCode}</p>
       </div>
-
       {badge && (
         <div className={`px-3 py-1.5 rounded-md text-sm border ${badge.color} flex items-center gap-2`}>
           <span>{badge.emoji}</span>
           <span>{badge.label}</span>
         </div>
       )}
-
       <button
         onClick={onToggleFavourite}
-        className="text-gray-400 hover:text-yellow-500 transition-colors"
+        style={{ color: isFavourite ? '#EAB308' : textSecondary }}
+        className="transition-colors"
       >
-        <Star
-          className={`w-6 h-6 ${isFavourite ? 'fill-yellow-500 text-yellow-500' : ''}`}
-        />
+        <Star className={`w-6 h-6 ${isFavourite ? 'fill-yellow-500' : ''}`} />
       </button>
     </div>
   );
