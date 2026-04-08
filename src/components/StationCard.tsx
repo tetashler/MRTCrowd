@@ -1,5 +1,5 @@
 import { Star } from 'lucide-react';
-import { getStationName } from '../data/stations';
+import { getStationName, getLineColor, INTERCHANGE_LINES } from '../data/stations';
 import { useTheme } from '../context/ThemeContext';
 
 interface StationCardProps {
@@ -30,6 +30,7 @@ export const StationCard = ({
 }: StationCardProps) => {
   const { isDark } = useTheme();
   const badge = crowdLevel ? getCrowdBadge(crowdLevel) : null;
+  const interchangeLines = INTERCHANGE_LINES[stationCode] || [];
 
   const cardBg = isDark ? '#1A1A1A' : '#FFFFFF';
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
@@ -41,9 +42,28 @@ export const StationCard = ({
       style={{ backgroundColor: cardBg, borderLeft: `3px solid ${lineColor}` }}
     >
       <div className="flex-1">
-        <h3 className="font-semibold text-lg" style={{ color: textPrimary }}>
-          {getStationName(stationCode)}
-        </h3>
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="font-semibold text-lg" style={{ color: textPrimary }}>
+            {getStationName(stationCode)}
+          </h3>
+          {/* Interchange line dots */}
+          {interchangeLines.length > 0 && (
+            <div className="flex items-center gap-1">
+              {interchangeLines.map(lineCode => (
+                <div
+                  key={lineCode}
+                  className="w-4 h-4 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: getLineColor(lineCode) }}
+                  title={lineCode}
+                >
+                  <span className="text-white font-bold" style={{ fontSize: '7px' }}>
+                    {lineCode.replace('L', '')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         <p className="text-sm" style={{ color: textSecondary }}>{stationCode}</p>
       </div>
       {badge && (
