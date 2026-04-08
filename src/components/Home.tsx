@@ -24,7 +24,7 @@ export const Home = ({ onSelectLine }: HomeProps) => {
 
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: textPrimary }}>MRTLeh</h1>
+            <h1 className="text-3xl font-bold" style={{ color: textPrimary }}>MRTCrowd</h1>
             <p className="text-sm mt-1" style={{ color: textSecondary }}>
               Live crowd levels · Singapore MRT
             </p>
