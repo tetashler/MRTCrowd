@@ -91,9 +91,9 @@ export default function InteractiveMap() {
 
   const handleDotClick = (station: Station, e: React.MouseEvent) => {
     e.stopPropagation();
-    const isMobile = window.innerWidth < 768;
+    const isTouchDevice = 'ontouchstart' in window;
 
-    if (isMobile) {
+    if (isTouchDevice) {
       setPopup({ station, x: 0, y: 0 });
     } else {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -175,12 +175,12 @@ export default function InteractiveMap() {
       </div>
 
       {popup && (() => {
-        const isMobile = window.innerWidth < 768;
+        const isTouchDevice = 'ontouchstart' in window;
         return (
           <div
             className="fixed z-[200] bg-[#1c2128] border border-[#30363d] rounded-xl p-4 w-60 shadow-[0_8px_32px_rgba(0,0,0,0.7)]"
             style={
-              isMobile
+              isTouchDevice
                 ? { bottom: '80px', left: '50%', transform: 'translateX(-50%)' }
                 : { left: popup.x, top: popup.y - 10, transform: 'translate(-50%, -100%)' }
             }
