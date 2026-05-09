@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Sun, Moon, Search, X } from 'lucide-react';
+import { Sun, Moon, Search, X, Map, List } from 'lucide-react';
 import { DisruptionBanner } from './DisruptionBanner';
 import { LineCard } from './LineCard';
 import { FavouriteStations } from './FavouriteStations';
+import InteractiveMap from './InteractiveMap';
 import { MRT_LINES, STATION_NAMES, getLineColor } from '../data/stations';
 import { useTheme } from '../context/ThemeContext';
+import { useView } from '../context/ViewContext';
 
 interface HomeProps {
   onSelectLine: (lineCode: string) => void;
@@ -21,6 +23,7 @@ export const Home = ({ onSelectLine }: HomeProps) => {
   const [updateKey, setUpdateKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const { isDark, toggleTheme } = useTheme();
+  const { isMapView, toggleView } = useView();
 
   const bg = isDark ? '#0D0D0D' : '#F5F5F5';
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
@@ -47,21 +50,40 @@ export const Home = ({ onSelectLine }: HomeProps) => {
               Live crowd levels · Singapore MRT
             </p>
           </div>
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-full transition-colors duration-200"
-            style={{
-              backgroundColor: isDark ? '#1A1A1A' : '#E5E7EB',
-              color: isDark ? '#FACC15' : '#374151',
-            }}
-            aria-label="Toggle theme"
-          >
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleView}
+              className="p-2 rounded-full transition-colors duration-200"
+              style={{
+                backgroundColor: isDark ? '#1A1A1A' : '#E5E7EB',
+                color: textPrimary,
+              }}
+              aria-label="Toggle view"
+            >
+              {isMapView ? <List className="w-5 h-5" /> : <Map className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full transition-colors duration-200"
+              style={{
+                backgroundColor: isDark ? '#1A1A1A' : '#E5E7EB',
+                color: isDark ? '#FACC15' : '#374151',
+              }}
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
-        {/* Search bar */}
-        <div className="relative mb-5">
+        {/* Map view */}
+        {isMapView && <InteractiveMap />}
+
+        {/* List view */}
+        {!isMapView && (
+          <>
+            {/* Search bar */}
+            <div className="relative mb-5">
           <div
             className="flex items-center gap-2 rounded-xl px-3 py-2.5 border"
             style={{ backgroundColor: inputBg, borderColor: inputBorder }}
@@ -135,6 +157,8 @@ export const Home = ({ onSelectLine }: HomeProps) => {
             <LineCard key={line.code} line={line} onClick={() => onSelectLine(line.code)} />
           ))}
         </div>
+          </>
+        )}
       </div>
     </div>
   );
