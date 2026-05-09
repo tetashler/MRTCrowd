@@ -91,18 +91,23 @@ export default function InteractiveMap() {
 
   const handleDotClick = (station: Station, e: React.MouseEvent) => {
     e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
+    const isMobile = window.innerWidth < 768;
 
-    let x = rect.left + rect.width / 2;
-    let y = rect.top;
+    if (isMobile) {
+      setPopup({ station, x: 0, y: 0 });
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      let x = rect.left + rect.width / 2;
+      let y = rect.top;
 
-    if (window.visualViewport) {
-      const vp = window.visualViewport;
-      x = (x - vp.offsetLeft) / vp.scale + vp.offsetLeft;
-      y = (y - vp.offsetTop) / vp.scale + vp.offsetTop;
+      if (window.visualViewport) {
+        const vp = window.visualViewport;
+        x = (x - vp.offsetLeft) / vp.scale + vp.offsetLeft;
+        y = (y - vp.offsetTop) / vp.scale + vp.offsetTop;
+      }
+
+      setPopup({ station, x, y });
     }
-
-    setPopup({ station, x, y });
   };
 
   const visibleStations = STATIONS.filter(s =>
@@ -169,17 +174,26 @@ export default function InteractiveMap() {
         </div>
       </div>
 
-      {popup && (
-        <div
-          className="fixed z-[200] bg-[#1c2128] border border-[#30363d] rounded-xl p-4 w-60 shadow-[0_8px_32px_rgba(0,0,0,0.7)]"
-          style={{
-            left: popup.x,
-            top: popup.y - 10,
-            transform: 'translate(-50%, -100%)',
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="text-[15px] font-bold mb-2">{popup.station.name}</div>
+      {popup && (() => {
+        const isMobile = window.innerWidth < 768;
+        return (
+          <div
+            className="fixed z-[200] bg-[#1c2128] border border-[#30363d] rounded-xl p-4 w-60 shadow-[0_8px_32px_rgba(0,0,0,0.7)]"
+            style={
+              isMobile
+                ? { bottom: '80px', left: '50%', transform: 'translateX(-50%)' }
+                : { left: popup.x, top: popup.y - 10, transform: 'translate(-50%, -100%)' }
+            }
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setPopup(null)}
+              className="absolute top-2 right-2 text-[#8b949e] hover:text-white transition-colors"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <div className="text-[15px] font-bold mb-2">{popup.station.name}</div>
           <div className="flex gap-1.5 flex-wrap mb-2.5">
             {popup.station.lines.map(line => (
               <span
@@ -200,7 +214,8 @@ export default function InteractiveMap() {
           </div>
           <div className="text-[11px] text-[#8b949e]">⏰ 5:30am – 12:00am</div>
         </div>
-      )}
+        );
+      })()}
 
       <div className="p-3 bg-[#161b22] border-t border-[#30363d] flex gap-4 text-xs">
         <div className="flex items-center gap-1.5">
