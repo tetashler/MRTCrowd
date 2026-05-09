@@ -3,8 +3,8 @@ import { ArrowLeft, RefreshCw, Clock } from 'lucide-react';
 import { StationCard } from './StationCard';
 import { LINE_STATIONS, MRT_LINES, getLineColor } from '../data/stations';
 import { addFavourite, removeFavourite, isFavourite } from '../utils/favourites';
-import { CrowdDataResponse } from '../types/api';
 import { useTheme } from '../context/ThemeContext';
+import { useCrowdData } from '../hooks/useCrowdData';
 
 interface LineScreenProps {
   lineCode: string;
@@ -12,7 +12,6 @@ interface LineScreenProps {
   onBack: () => void;
 }
 
-// First and last train times per line (simplified, based on LTA published schedules)
 const OPERATING_HOURS: Record<string, { first: string; last: string }> = {
   NSL: { first: '05:30', last: '23:18' },
   EWL: { first: '05:13', last: '23:59' },
@@ -47,10 +46,7 @@ const getOperatingStatus = (lineCode: string) => {
 };
 
 export const LineScreen = ({ lineCode, highlightStation, onBack }: LineScreenProps) => {
-  const [crowdData, setCrowdData] = useState<Map<string, 'l' | 'm' | 'h'>>(new Map());
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const { crowdData, loading, refreshing, lastUpdated, refresh } = useCrowdData();
   const [favourites, setFavourites] = useState<Set<string>>(new Set());
   const [highlightedStation, setHighlightedStation] = useState<string | null>(highlightStation || null);
 
@@ -64,31 +60,6 @@ export const LineScreen = ({ lineCode, highlightStation, onBack }: LineScreenPro
   const headerBg = isDark ? '#0D0D0D' : '#F5F5F5';
   const textSecondary = isDark ? '#9CA3AF' : '#6B7280';
 
-  const fetchCrowdData = async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
-
-    try {
-      const response = await fetch(`/api/lta?endpoint=PCDRealTime&TrainLine=${lineCode}`);
-      const data: CrowdDataResponse = await response.json();
-
-      const newCrowdData = new Map<string, 'l' | 'm' | 'h'>();
-      if (data.value) {
-        data.value.forEach(station => {
-          newCrowdData.set(station.Station, station.CrowdLevel);
-        });
-      }
-
-      setCrowdData(newCrowdData);
-      setLastUpdated(new Date());
-    } catch (error) {
-      console.error('Failed to fetch crowd data:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
   const loadFavourites = () => {
     const favs = new Set<string>();
     stations.forEach(station => {
@@ -98,10 +69,7 @@ export const LineScreen = ({ lineCode, highlightStation, onBack }: LineScreenPro
   };
 
   useEffect(() => {
-    fetchCrowdData();
     loadFavourites();
-    const interval = setInterval(() => fetchCrowdData(true), 60000);
-    return () => clearInterval(interval);
   }, [lineCode]);
 
   useEffect(() => {
@@ -142,7 +110,7 @@ export const LineScreen = ({ lineCode, highlightStation, onBack }: LineScreenPro
 
   return (
     <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>
-      <div className="max-w-md mx-auto">
+      <div className="max-md mx-auto">
 
         {/* Sticky header */}
         <div
@@ -171,7 +139,7 @@ export const LineScreen = ({ lineCode, highlightStation, onBack }: LineScreenPro
               </div>
             </div>
             <button
-              onClick={() => fetchCrowdData(true)}
+              onClick={refresh}
               disabled={refreshing}
               className="p-1 rounded-full transition-colors disabled:opacity-50"
               style={{ color: textSecondary }}

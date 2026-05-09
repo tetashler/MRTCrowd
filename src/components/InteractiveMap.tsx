@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { STATIONS, type Station, type CrowdLevel } from '../data/mrtStations';
-import { CrowdDataResponse } from '../types/api';
+import { useCrowdData } from '../hooks/useCrowdData';
 
 const LINE_COLORS: Record<string, string> = {
   NS: '#d42e12',
@@ -18,16 +18,6 @@ const CROWD_COLORS: Record<string, string> = {
   High: '#ef4444',
 };
 
-const LINE_CODES: Record<string, string> = {
-  NS: 'NSL',
-  EW: 'EWL',
-  CC: 'CCL',
-  DT: 'DTL',
-  TE: 'TEL',
-  NE: 'NEL',
-  CG: 'CGL',
-};
-
 const convertCrowdLevel = (level: 'l' | 'm' | 'h'): CrowdLevel => {
   if (level === 'l') return 'Low';
   if (level === 'm') return 'Moderate';
@@ -43,39 +33,8 @@ export default function InteractiveMap() {
     x: number;
     y: number;
   } | null>(null);
-  const [crowdData, setCrowdData] = useState<Map<string, CrowdLevel>>(new Map());
-  const [loading, setLoading] = useState(true);
 
-  const fetchCrowdData = async () => {
-    try {
-      const allData = new Map<string, CrowdLevel>();
-
-      for (const [shortCode, fullCode] of Object.entries(LINE_CODES)) {
-        try {
-          const response = await fetch(`/api/lta?endpoint=PCDRealTime&TrainLine=${fullCode}`);
-          const data: CrowdDataResponse = await response.json();
-
-          if (data.value) {
-            data.value.forEach(station => {
-              allData.set(station.Station, convertCrowdLevel(station.CrowdLevel));
-            });
-          }
-        } catch (error) {
-          console.error(`Failed to fetch crowd data for ${shortCode}:`, error);
-        }
-      }
-
-      setCrowdData(allData);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCrowdData();
-    const interval = setInterval(fetchCrowdData, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const { crowdData, loading } = useCrowdData();
 
   const toggleLine = (line: string) => {
     setActiveLines(prev => {
@@ -112,10 +71,13 @@ export default function InteractiveMap() {
 
   const visibleStations = STATIONS.filter(s =>
     s.lines.some(l => activeLines.has(l))
-  ).map(s => ({
-    ...s,
-    crowd: crowdData.get(s.id) || 'Low' as CrowdLevel,
-  }));
+  ).map(s => {
+    const raw = crowdData.get(s.id);
+    return {
+      ...s,
+      crowd: raw ? convertCrowdLevel(raw) : ('Low' as CrowdLevel),
+    };
+  });
 
   return (
     <div className="flex flex-col h-full bg-[#0d1117]" onClick={() => setPopup(null)}>
@@ -124,9 +86,8 @@ export default function InteractiveMap() {
           <button
             key={line}
             onClick={() => toggleLine(line)}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition-opacity ${
-              activeLines.has(line) ? 'opacity-100' : 'opacity-40'
-            }`}
+            className={`px-3 py-1.5 rounded text-sm font-medium transition-opacity ${activeLines.has(line) ? 'opacity-100' : 'opacity-40'
+              }`}
             style={{ backgroundColor: LINE_COLORS[line], color: '#fff' }}
           >
             {line}
@@ -162,12 +123,7 @@ export default function InteractiveMap() {
                 }}
                 onClick={(e) => handleDotClick(station, e)}
               >
-                <div
-                  style={{
-                    width: size,
-                    height: size,
-                  }}
-                />
+                <div style={{ width: size, height: size }} />
               </div>
             );
           })}
@@ -194,26 +150,26 @@ export default function InteractiveMap() {
               ×
             </button>
             <div className="text-[15px] font-bold mb-2">{popup.station.name}</div>
-          <div className="flex gap-1.5 flex-wrap mb-2.5">
-            {popup.station.lines.map(line => (
-              <span
-                key={line}
-                className="px-2 py-0.5 rounded text-xs font-semibold text-white"
-                style={{ backgroundColor: LINE_COLORS[line] }}
-              >
-                {line}
-              </span>
-            ))}
+            <div className="flex gap-1.5 flex-wrap mb-2.5">
+              {popup.station.lines.map(line => (
+                <span
+                  key={line}
+                  className="px-2 py-0.5 rounded text-xs font-semibold text-white"
+                  style={{ backgroundColor: LINE_COLORS[line] }}
+                >
+                  {line}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 text-[13px] mb-1.5">
+              <div
+                className="w-2.5 h-2.5 rounded-full"
+                style={{ backgroundColor: CROWD_COLORS[popup.station.crowd] }}
+              />
+              <span>{popup.station.crowd}</span>
+            </div>
+            <div className="text-[11px] text-[#8b949e]">⏰ 5:30am – 12:00am</div>
           </div>
-          <div className="flex items-center gap-2 text-[13px] mb-1.5">
-            <div
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: CROWD_COLORS[popup.station.crowd] }}
-            />
-            <span>{popup.station.crowd}</span>
-          </div>
-          <div className="text-[11px] text-[#8b949e]">⏰ 5:30am – 12:00am</div>
-        </div>
         );
       })()}
 

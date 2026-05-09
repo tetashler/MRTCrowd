@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Star, X } from 'lucide-react';
 import { getFavourites, removeFavourite, Favourite } from '../utils/favourites';
 import { getStationName, getLineColor } from '../data/stations';
-import { CrowdDataResponse } from '../types/api';
 import { useTheme } from '../context/ThemeContext';
+import { useCrowdData } from '../hooks/useCrowdData';
 
 const getCrowdBadge = (level: 'l' | 'm' | 'h') => {
   switch (level) {
@@ -18,7 +18,7 @@ const getCrowdBadge = (level: 'l' | 'm' | 'h') => {
 
 export const FavouriteStations = ({ onUpdate }: { onUpdate?: () => void }) => {
   const [favourites, setFavourites] = useState<Favourite[]>([]);
-  const [crowdData, setCrowdData] = useState<Map<string, 'l' | 'm' | 'h'>>(new Map());
+  const { crowdData } = useCrowdData();
   const { isDark } = useTheme();
 
   const cardBg = isDark ? '#1A1A1A' : '#FFFFFF';
@@ -27,36 +27,7 @@ export const FavouriteStations = ({ onUpdate }: { onUpdate?: () => void }) => {
 
   const loadFavourites = () => setFavourites(getFavourites());
 
-  const fetchCrowdData = async () => {
-    try {
-      const uniqueLines = [...new Set(favourites.map(f => f.lineCode))];
-      const allData = new Map<string, 'l' | 'm' | 'h'>();
-
-      for (const lineCode of uniqueLines) {
-        const response = await fetch(`/api/lta?endpoint=PCDRealTime&TrainLine=${lineCode}`);
-        const data: CrowdDataResponse = await response.json();
-        if (data.value) {
-          data.value.forEach(station => {
-            allData.set(station.Station, station.CrowdLevel);
-          });
-        }
-      }
-
-      setCrowdData(allData);
-    } catch (error) {
-      console.error('Failed to fetch crowd data:', error);
-    }
-  };
-
   useEffect(() => { loadFavourites(); }, []);
-
-  useEffect(() => {
-    if (favourites.length > 0) {
-      fetchCrowdData();
-      const interval = setInterval(fetchCrowdData, 60000);
-      return () => clearInterval(interval);
-    }
-  }, [favourites]);
 
   const handleRemove = (stationCode: string) => {
     removeFavourite(stationCode);
