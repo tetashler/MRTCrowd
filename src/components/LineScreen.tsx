@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 
 interface LineScreenProps {
   lineCode: string;
+  highlightStation?: string | null;
   onBack: () => void;
 }
 
@@ -45,12 +46,13 @@ const getOperatingStatus = (lineCode: string) => {
   return { running: true, warning: false, message: `Operating · Last train ${hours.last}` };
 };
 
-export const LineScreen = ({ lineCode, onBack }: LineScreenProps) => {
+export const LineScreen = ({ lineCode, highlightStation, onBack }: LineScreenProps) => {
   const [crowdData, setCrowdData] = useState<Map<string, 'l' | 'm' | 'h'>>(new Map());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [favourites, setFavourites] = useState<Set<string>>(new Set());
+  const [highlightedStation, setHighlightedStation] = useState<string | null>(highlightStation || null);
 
   const { isDark } = useTheme();
   const line = MRT_LINES.find(l => l.code === lineCode);
@@ -101,6 +103,18 @@ export const LineScreen = ({ lineCode, onBack }: LineScreenProps) => {
     const interval = setInterval(() => fetchCrowdData(true), 60000);
     return () => clearInterval(interval);
   }, [lineCode]);
+
+  useEffect(() => {
+    if (highlightStation && !loading) {
+      const element = document.getElementById(`station-${highlightStation}`);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+        setTimeout(() => setHighlightedStation(null), 3000);
+      }
+    }
+  }, [highlightStation, loading]);
 
   const handleToggleFavourite = (stationCode: string) => {
     if (favourites.has(stationCode)) {
@@ -222,7 +236,18 @@ export const LineScreen = ({ lineCode, onBack }: LineScreenProps) => {
               />
               <div className="space-y-2">
                 {stations.map((stationCode) => (
-                  <div key={stationCode} className="relative flex items-center gap-3">
+                  <div
+                    key={stationCode}
+                    id={`station-${stationCode}`}
+                    className="relative flex items-center gap-3"
+                    style={{
+                      transition: 'all 0.3s ease',
+                      ...(highlightedStation === stationCode && {
+                        transform: 'scale(1.02)',
+                        filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))',
+                      }),
+                    }}
+                  >
                     <div
                       className="flex-shrink-0 rounded-full"
                       style={{

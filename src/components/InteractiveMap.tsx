@@ -92,11 +92,17 @@ export default function InteractiveMap() {
   const handleDotClick = (station: Station, e: React.MouseEvent) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
-    setPopup({
-      station,
-      x: rect.left + rect.width / 2,
-      y: rect.top,
-    });
+
+    let x = rect.left + rect.width / 2;
+    let y = rect.top;
+
+    if (window.visualViewport) {
+      const vp = window.visualViewport;
+      x = (x - vp.offsetLeft) / vp.scale + vp.offsetLeft;
+      y = (y - vp.offsetTop) / vp.scale + vp.offsetTop;
+    }
+
+    setPopup({ station, x, y });
   };
 
   const visibleStations = STATIONS.filter(s =>

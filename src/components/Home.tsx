@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useView } from '../context/ViewContext';
 
 interface HomeProps {
-  onSelectLine: (lineCode: string) => void;
+  onSelectLine: (lineCode: string, stationCode?: string) => void;
 }
 
 // Build a flat searchable list of all stations
@@ -114,7 +114,7 @@ export const Home = ({ onSelectLine }: HomeProps) => {
                 <button
                   key={station.code}
                   onClick={() => {
-                    onSelectLine(station.lineCode);
+                    onSelectLine(station.lineCode, station.code);
                     setSearchQuery('');
                   }}
                   className="w-full px-4 py-3 flex items-center gap-3 text-left transition-colors"

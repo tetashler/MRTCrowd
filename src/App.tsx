@@ -7,14 +7,29 @@ import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [selectedLine, setSelectedLine] = useState<string | null>(null);
+  const [selectedStation, setSelectedStation] = useState<string | null>(null);
+
+  const handleSelectLine = (lineCode: string, stationCode?: string) => {
+    setSelectedLine(lineCode);
+    setSelectedStation(stationCode || null);
+  };
+
+  const handleBack = () => {
+    setSelectedLine(null);
+    setSelectedStation(null);
+  };
 
   return (
     <ThemeProvider>
       <ViewProvider>
         {selectedLine ? (
-          <LineScreen lineCode={selectedLine} onBack={() => setSelectedLine(null)} />
+          <LineScreen
+            lineCode={selectedLine}
+            highlightStation={selectedStation}
+            onBack={handleBack}
+          />
         ) : (
-          <Home onSelectLine={setSelectedLine} />
+          <Home onSelectLine={handleSelectLine} />
         )}
         <Analytics />
       </ViewProvider>
