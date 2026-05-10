@@ -53,7 +53,7 @@ export const STATION_NAMES: Record<string, string> = {
   TE5: 'Lentor', TE6: 'Mayflower', TE7: 'Bright Hill', TE8: 'Upper Thomson',
   TE9: 'Caldecott', TE11: 'Stevens', TE12: 'Napier', TE13: 'Orchard Boulevard',
   TE14: 'Orchard', TE15: 'Great World', TE16: 'Havelock', TE17: 'Outram Park',
-  TE18: 'Maxwell', TE19: 'Shenton Way', TE20: 'Marina Bay', TE22: "Founders' Memorial",
+  TE18: 'Maxwell', TE19: 'Shenton Way', TE20: 'Marina Bay', TE22: 'Gardens by the Bay',
   TE23: 'Tanjong Rhu', TE24: 'Katong Park', TE25: 'Tanjong Katong',
   TE26: 'Marine Parade', TE27: 'Marine Terrace', TE28: 'Siglap', TE29: 'Bayshore',
 };
