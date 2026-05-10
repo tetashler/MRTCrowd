@@ -110,7 +110,7 @@ export const LineScreen = ({ lineCode, highlightStation, onBack }: LineScreenPro
 
   return (
     <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>
-      <div className="max-md mx-auto">
+      <div className="max-w-md mx-auto">
 
         {/* Sticky header */}
         <div
