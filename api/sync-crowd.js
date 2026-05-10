@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const LTA_API_BASE = 'https://datamall2.mytransport.sg/ltaodataservice';
+const LINES = ['NSL', 'EWL', 'NEL', 'CCL', 'DTL', 'TEL'];
 
 export default async function handler(req, res) {
     // Block non-cron calls in production
@@ -10,15 +11,17 @@ export default async function handler(req, res) {
     }
 
     try {
-        // 1. Fetch crowd data from LTA
-        const ltaRes = await fetch(`${LTA_API_BASE}/PCDRealTime?TrainLine=ALL`, {
-            headers: {
-                'AccountKey': process.env.LTA_API_KEY,
-                'Accept': 'application/json',
-            },
-        });
-        const ltaData = await ltaRes.json();
-        const stations = ltaData.value;
+        // 1. Fetch crowd data from LTA for each line
+        const results = await Promise.all(LINES.map(line =>
+            fetch(`${LTA_API_BASE}/PCDRealTime?TrainLine=${line}`, {
+                headers: {
+                    'AccountKey': process.env.LTA_API_KEY,
+                    'Accept': 'application/json',
+                },
+            }).then(r => r.json())
+        ));
+
+        const stations = results.flatMap(r => r.value || []);
 
         // 2. Upsert into Supabase
         const supabase = createClient(
