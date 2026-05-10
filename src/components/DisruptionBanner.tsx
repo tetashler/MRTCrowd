@@ -1,39 +1,47 @@
 import { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 interface AlertMessage {
   Content: string;
 }
 
-interface TrainServiceAlert {
-  Status: number;
-  AffectedSegments: unknown[];
-  Message: AlertMessage[];
+interface TrainAlert {
+  status: number;
+  messages: AlertMessage[];
 }
 
 export const DisruptionBanner = () => {
-  const [alerts, setAlerts] = useState<TrainServiceAlert | null>(null);
+  const [alert, setAlert] = useState<TrainAlert | null>(null);
 
   useEffect(() => {
     const fetchAlerts = async () => {
-      try {
-        const response = await fetch('/api/lta?endpoint=TrainServiceAlerts');
-        const data = await response.json();
-        setAlerts(data.value || null);
-      } catch (error) {
+      const { data, error } = await supabase
+        .from('train_alerts')
+        .select('status, messages')
+        .single();
+
+      if (error) {
         console.error('Failed to fetch alerts:', error);
+        return;
       }
+
+      setAlert(data);
     };
 
     fetchAlerts();
-    const interval = setInterval(fetchAlerts, 60000);
+    const interval = setInterval(fetchAlerts, 10 * 60 * 1000); // re-fetch every 10 min
     return () => clearInterval(interval);
   }, []);
 
-  if (!alerts) return null;
+  if (!alert) return null;
 
-  const hasDisruption =
-    alerts.Status !== 1 || (alerts.Message && alerts.Message.length > 0);
+  const hasDisruption = alert.status !== 1 || alert.messages?.length > 0;
 
   if (!hasDisruption) return null;
 
@@ -42,7 +50,7 @@ export const DisruptionBanner = () => {
       <div className="flex gap-3">
         <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
         <div className="flex-1">
-          {alerts.Message.map((msg, idx) => (
+          {alert.messages.map((msg, idx) => (
             <p key={idx} className="text-red-400 text-sm leading-relaxed">
               {msg.Content}
             </p>
