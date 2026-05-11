@@ -35,6 +35,17 @@ export default async function handler(req, res) {
             updated_at: new Date().toISOString(),
         }));
 
+        // 3. Alias Circle Line Extension stations from their interchange counterparts
+        const dt16 = rows.find(r => r.station_code === 'DT16');
+        const ns27 = rows.find(r => r.station_code === 'NS27');
+
+        if (dt16) {
+            rows.push({ station_code: 'CE1', crowd_level: dt16.crowd_level, updated_at: dt16.updated_at });
+        }
+        if (ns27) {
+            rows.push({ station_code: 'CE2', crowd_level: ns27.crowd_level, updated_at: ns27.updated_at });
+        }
+
         const { error } = await supabase
             .from('mrt_crowd')
             .upsert(rows, { onConflict: 'station_code' });
