@@ -104,7 +104,7 @@ export default function InteractiveMap() {
         const isTouchDevice = 'ontouchstart' in window;
         return (
           <div
-            className="fixed z-[200] bg-[#1c2128] border border-[#30363d] rounded-xl p-4 w-60 shadow-[0_8px_32px_rgba(0,0,0,0.7)]"
+            className="fixed z-[200] bg-[#1c2128] border border-[#30363d] rounded-xl p-4 w-60 shadow-[0_8px_32px_rgba(0,0,0,0.7)] text-white"
             style={
               isTouchDevice
                 ? { bottom: '80px', left: '50%', transform: 'translateX(-50%)' }
@@ -119,7 +119,7 @@ export default function InteractiveMap() {
             >
               ×
             </button>
-            <div className="text-[15px] font-bold mb-2">{popup.station.name}</div>
+            <div className="text-[15px] font-bold mb-2" style={{ color: '#ffffff' }}>{popup.station.name}</div>
             <div className="flex gap-1.5 flex-wrap mb-2.5">
               {popup.station.lines.map(line => (
                 <span
@@ -136,9 +136,9 @@ export default function InteractiveMap() {
                 className="w-2.5 h-2.5 rounded-full"
                 style={{ backgroundColor: CROWD_COLORS[popup.station.crowd] }}
               />
-              <span>{popup.station.crowd}</span>
+              <span style={{ color: '#ffffff' }}>{popup.station.crowd}</span>
             </div>
-            <div className="text-[11px] text-[#8b949e]">⏰ 5:30am – 12:00am</div>
+            <div className="text-[11px]" style={{ color: '#d1d5db' }}>⏰ 5:30am – 12:00am</div>
           </div>
         );
       })()}

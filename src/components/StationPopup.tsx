@@ -1,6 +1,5 @@
 import { X, Clock } from 'lucide-react';
 import { getStationName, getLineColor, INTERCHANGE_LINES } from '../data/stations';
-import { useTheme } from '../context/ThemeContext';
 
 interface StationPopupProps {
   stationCode: string;
@@ -29,7 +28,6 @@ const OPERATING_HOURS: Record<string, { first: string; last: string }> = {
 };
 
 export const StationPopup = ({ stationCode, crowdLevel, onClose }: StationPopupProps) => {
-  const { isDark } = useTheme();
   const badge = crowdLevel ? getCrowdBadge(crowdLevel) : null;
   const interchangeLines = INTERCHANGE_LINES[stationCode] || [];
 
@@ -38,15 +36,11 @@ export const StationPopup = ({ stationCode, crowdLevel, onClose }: StationPopupP
   const lineColor = getLineColor(lineCode);
   const hours = OPERATING_HOURS[lineCode];
 
-  const cardBg = isDark ? '#1A1A1A' : '#FFFFFF';
-  const textPrimary = isDark ? '#FFFFFF' : '#111111';
-  const textSecondary = isDark ? '#9CA3AF' : '#6B7280';
-
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
         className="rounded-xl p-4 shadow-2xl max-w-sm w-full animate-in fade-in zoom-in duration-200"
-        style={{ backgroundColor: cardBg }}
+        style={{ backgroundColor: '#1A1A1A' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-3">
@@ -68,12 +62,12 @@ export const StationPopup = ({ stationCode, crowdLevel, onClose }: StationPopupP
                 </div>
               ))}
             </div>
-            <h3 className="font-bold text-lg" style={{ color: textPrimary }}>
+            <h3 className="font-bold text-lg text-white">
               {getStationName(stationCode)}
             </h3>
-            <p className="text-sm" style={{ color: textSecondary }}>{stationCode}</p>
+            <p className="text-sm text-white">{stationCode}</p>
           </div>
-          <button onClick={onClose} className="p-1" style={{ color: textSecondary }}>
+          <button onClick={onClose} className="p-1 text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -86,7 +80,7 @@ export const StationPopup = ({ stationCode, crowdLevel, onClose }: StationPopupP
         )}
 
         {hours && (
-          <div className="flex items-center gap-2 text-sm" style={{ color: textSecondary }}>
+          <div className="flex items-center gap-2 text-sm text-white">
             <Clock className="w-4 h-4" />
             <span>Operating: {hours.first} - {hours.last}</span>
           </div>
