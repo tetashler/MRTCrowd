@@ -1,16 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Clock } from 'lucide-react';
 import { StationCard } from './StationCard';
 import { LINE_STATIONS, MRT_LINES, getLineColor } from '../data/stations';
 import { addFavourite, removeFavourite, isFavourite } from '../utils/favourites';
 import { useTheme } from '../context/ThemeContext';
 import { useCrowdData } from '../hooks/useCrowdData';
-
-interface LineScreenProps {
-  lineCode: string;
-  highlightStation?: string | null;
-  onBack: () => void;
-}
 
 const OPERATING_HOURS: Record<string, { first: string; last: string }> = {
   NSL: { first: '05:30', last: '23:18' },
@@ -45,16 +40,23 @@ const getOperatingStatus = (lineCode: string) => {
   return { running: true, warning: false, message: `Operating · Last train ${hours.last}` };
 };
 
-export const LineScreen = ({ lineCode, highlightStation, onBack }: LineScreenProps) => {
+export const LineScreen = () => {
+  const navigate = useNavigate();
+  const { lineCode = '' } = useParams<{ lineCode: string }>();
+  const [searchParams] = useSearchParams();
+  const highlightStation = searchParams.get('station');
+
   const { crowdData, loading, refreshing, lastUpdated, refresh } = useCrowdData();
   const [favourites, setFavourites] = useState<Set<string>>(new Set());
-  const [highlightedStation, setHighlightedStation] = useState<string | null>(highlightStation || null);
+  const [highlightedStation, setHighlightedStation] = useState<string | null>(highlightStation);
 
   const { isDark } = useTheme();
   const line = MRT_LINES.find(l => l.code === lineCode);
   const stations = LINE_STATIONS[lineCode] || [];
   const lineColor = getLineColor(lineCode);
   const opStatus = getOperatingStatus(lineCode);
+
+  const onBack = () => navigate(-1);
 
   const bg = isDark ? '#0D0D0D' : '#F5F5F5';
   const headerBg = isDark ? '#0D0D0D' : '#F5F5F5';
@@ -107,6 +109,8 @@ export const LineScreen = ({ lineCode, highlightStation, onBack }: LineScreenPro
       hour: '2-digit', minute: '2-digit', second: '2-digit',
     });
   };
+
+  if (!line) return <Navigate to="/" replace />;
 
   return (
     <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>

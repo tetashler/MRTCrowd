@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sun, Moon, Search, X, Map, List } from 'lucide-react';
 import { DisruptionBanner } from './DisruptionBanner';
 import { LineCard } from './LineCard';
@@ -8,10 +9,6 @@ import { MRT_LINES, STATION_NAMES, getLineColor } from '../data/stations';
 import { useTheme } from '../context/ThemeContext';
 import { useView } from '../context/ViewContext';
 
-interface HomeProps {
-  onSelectLine: (lineCode: string, stationCode?: string) => void;
-}
-
 // Build a flat searchable list of all stations
 const ALL_STATIONS = Object.entries(STATION_NAMES).map(([code, name]) => {
   const lineCode = code.replace(/[0-9]/g, '').replace('EW', 'EWL').replace('NS', 'NSL')
@@ -19,11 +16,19 @@ const ALL_STATIONS = Object.entries(STATION_NAMES).map(([code, name]) => {
   return { code, name, lineCode };
 });
 
-export const Home = ({ onSelectLine }: HomeProps) => {
+export const Home = () => {
+  const navigate = useNavigate();
   const [updateKey, setUpdateKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const { isDark, toggleTheme } = useTheme();
   const { isMapView, toggleView } = useView();
+
+  const goToLine = (lineCode: string, stationCode?: string) => {
+    const path = stationCode
+      ? `/line/${lineCode}?station=${stationCode}`
+      : `/line/${lineCode}`;
+    navigate(path);
+  };
 
   const bg = isDark ? '#0D0D0D' : '#F5F5F5';
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
@@ -114,7 +119,7 @@ export const Home = ({ onSelectLine }: HomeProps) => {
                 <button
                   key={station.code}
                   onClick={() => {
-                    onSelectLine(station.lineCode, station.code);
+                    goToLine(station.lineCode, station.code);
                     setSearchQuery('');
                   }}
                   className="w-full px-4 py-3 flex items-center gap-3 text-left transition-colors"
@@ -154,7 +159,7 @@ export const Home = ({ onSelectLine }: HomeProps) => {
 
         <div className="space-y-3">
           {MRT_LINES.map(line => (
-            <LineCard key={line.code} line={line} onClick={() => onSelectLine(line.code)} />
+            <LineCard key={line.code} line={line} onClick={() => goToLine(line.code)} />
           ))}
         </div>
           </>
