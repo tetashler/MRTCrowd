@@ -25,9 +25,6 @@ const convertCrowdLevel = (level: 'l' | 'm' | 'h'): CrowdLevel => {
 };
 
 export default function InteractiveMap() {
-  const [activeLines, setActiveLines] = useState<Set<string>>(
-    new Set(['NS', 'EW', 'CC', 'DT', 'TE', 'NE', 'CG'])
-  );
   const [popup, setPopup] = useState<{
     station: Station;
     x: number;
@@ -35,18 +32,6 @@ export default function InteractiveMap() {
   } | null>(null);
 
   const { crowdData, loading } = useCrowdData();
-
-  const toggleLine = (line: string) => {
-    setActiveLines(prev => {
-      const next = new Set(prev);
-      if (next.has(line)) {
-        next.delete(line);
-      } else {
-        next.add(line);
-      }
-      return next;
-    });
-  };
 
   const handleDotClick = (station: Station, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -69,9 +54,7 @@ export default function InteractiveMap() {
     }
   };
 
-  const visibleStations = STATIONS.filter(s =>
-    s.lines.some(l => activeLines.has(l))
-  ).map(s => {
+  const visibleStations = STATIONS.map(s => {
     const raw = crowdData.get(s.id);
     return {
       ...s,
@@ -81,21 +64,8 @@ export default function InteractiveMap() {
 
   return (
     <div className="flex flex-col h-full bg-[#0d1117]" onClick={() => setPopup(null)}>
-      <div className="flex gap-2 p-4 bg-[#161b22] border-b border-[#30363d] flex-wrap">
-        {['NS', 'EW', 'CC', 'DT', 'TE', 'NE', 'CG'].map(line => (
-          <button
-            key={line}
-            onClick={() => toggleLine(line)}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition-opacity ${activeLines.has(line) ? 'opacity-100' : 'opacity-40'
-              }`}
-            style={{ backgroundColor: LINE_COLORS[line], color: '#fff' }}
-          >
-            {line}
-          </button>
-        ))}
-        <div className="ml-auto text-[10px] text-[#484f58] self-center">
-          Click a station for details
-        </div>
+      <div className="px-4 py-2 bg-[#161b22] border-b border-[#30363d] text-right">
+        <span className="text-[10px] text-[#484f58]">Click a station for details</span>
       </div>
 
       <div className="flex-1 relative overflow-auto">
