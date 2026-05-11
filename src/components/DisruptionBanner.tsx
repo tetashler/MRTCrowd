@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -18,6 +18,7 @@ interface TrainAlert {
 
 export const DisruptionBanner = () => {
   const [alert, setAlert] = useState<TrainAlert | null>(null);
+  const [dismissedSignature, setDismissedSignature] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -45,9 +46,12 @@ export const DisruptionBanner = () => {
 
   if (!hasDisruption) return null;
 
+  const signature = JSON.stringify(alert.messages?.map(m => m.Content) ?? []);
+  if (dismissedSignature === signature) return null;
+
   return (
-    <div className="bg-red-600/20 border border-red-500/50 rounded-lg p-4 mb-6">
-      <div className="flex gap-3">
+    <div className="relative bg-red-600/20 border border-red-500/50 rounded-lg p-4 mb-6">
+      <div className="flex gap-3 pr-8">
         <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
         <div className="flex-1">
           {alert.messages.map((msg, idx) => (
@@ -57,6 +61,13 @@ export const DisruptionBanner = () => {
           ))}
         </div>
       </div>
+      <button
+        onClick={() => setDismissedSignature(signature)}
+        aria-label="Dismiss alert"
+        className="absolute top-2 right-2 p-1 rounded text-red-400 hover:text-red-200 hover:bg-red-500/20 transition-colors"
+      >
+        <X className="w-4 h-4" />
+      </button>
     </div>
   );
 };
