@@ -18,7 +18,14 @@ interface TrainAlert {
 
 export const DisruptionBanner = () => {
   const [alert, setAlert] = useState<TrainAlert | null>(null);
-  const [dismissedSignature, setDismissedSignature] = useState<string | null>(null);
+  const [dismissed, setDismissed] = useState<boolean>(
+    () => sessionStorage.getItem('disruption_dismissed') === 'true'
+  );
+
+  const handleDismiss = () => {
+    sessionStorage.setItem('disruption_dismissed', 'true');
+    setDismissed(true);
+  };
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -46,8 +53,7 @@ export const DisruptionBanner = () => {
 
   if (!hasDisruption) return null;
 
-  const signature = JSON.stringify(alert.messages?.map(m => m.Content) ?? []);
-  if (dismissedSignature === signature) return null;
+  if (dismissed) return null;
 
   return (
     <div className="relative bg-red-600/20 border border-red-500/50 rounded-lg p-4 mb-6">
@@ -62,7 +68,7 @@ export const DisruptionBanner = () => {
         </div>
       </div>
       <button
-        onClick={() => setDismissedSignature(signature)}
+        onClick={handleDismiss}
         aria-label="Dismiss alert"
         className="absolute top-2 right-2 p-1 rounded text-red-400 hover:text-red-200 hover:bg-red-500/20 transition-colors"
       >
