@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { STATIONS, type Station, type CrowdLevel } from '../data/mrtStations';
 import { useCrowdData } from '../hooks/useCrowdData';
+import { CrowdIcon } from './CrowdIcon';
 
 const LINE_COLORS: Record<string, string> = {
   NS: '#d42e12',
@@ -82,19 +83,33 @@ export default function InteractiveMap() {
         <div className="absolute inset-0 pointer-events-none">
           {visibleStations.map(station => {
             const size = station.lines.length > 1 ? 13 : 9;
+            const rawCrowd = crowdData.get(station.id);
             return (
-              <div
-                key={station.id}
-                className="absolute pointer-events-auto cursor-pointer"
-                style={{
-                  left: `${station.x}%`,
-                  top: `${station.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-                onClick={(e) => handleDotClick(station, e)}
-              >
-                <div style={{ width: size, height: size }} />
-              </div>
+              <Fragment key={station.id}>
+                <div
+                  className="absolute pointer-events-auto cursor-pointer"
+                  style={{
+                    left: `${station.x}%`,
+                    top: `${station.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                  onClick={(e) => handleDotClick(station, e)}
+                >
+                  <div style={{ width: size, height: size }} />
+                </div>
+                {rawCrowd && station.iconX !== undefined && station.iconY !== undefined && (
+                  <div
+                    className="absolute"
+                    style={{
+                      left: `${station.iconX}%`,
+                      top: `${station.iconY}%`,
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  >
+                    <CrowdIcon level={rawCrowd} />
+                  </div>
+                )}
+              </Fragment>
             );
           })}
         </div>
@@ -131,6 +146,7 @@ export default function InteractiveMap() {
                 </span>
               ))}
             </div>
+            {crowdData.get(popup.station.id) && (
             <div className="flex items-center gap-2 text-[13px] mb-1.5">
               <div
                 className="w-2.5 h-2.5 rounded-full"
@@ -138,6 +154,7 @@ export default function InteractiveMap() {
               />
               <span style={{ color: '#ffffff' }}>{popup.station.crowd}</span>
             </div>
+            )}
             <div className="text-[11px]" style={{ color: '#d1d5db' }}>⏰ 5:30am – 12:00am</div>
           </div>
         );
