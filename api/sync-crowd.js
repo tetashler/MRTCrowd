@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const LTA_API_BASE = 'https://datamall2.mytransport.sg/ltaodataservice';
-const LINES = ['NSL', 'EWL', 'NEL', 'CCL', 'DTL', 'TEL'];
+const LINES = ['NSL', 'EWL', 'NEL', 'CCL', 'DTL', 'TEL', 'CGL'];
 
 export default async function handler(req, res) {
     // Block non-cron calls in production
