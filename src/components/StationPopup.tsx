@@ -1,5 +1,6 @@
 import { X, Clock } from 'lucide-react';
 import { getStationName, getLineColor, INTERCHANGE_LINES } from '../data/stations';
+import { getTodayHours } from '../data/operatingHours';
 
 interface StationPopupProps {
   stationCode: string;
@@ -18,15 +19,6 @@ const getCrowdBadge = (level: 'l' | 'm' | 'h') => {
   }
 };
 
-const OPERATING_HOURS: Record<string, { first: string; last: string }> = {
-  NSL: { first: '05:30', last: '23:18' },
-  EWL: { first: '05:13', last: '23:59' },
-  NEL: { first: '05:30', last: '23:17' },
-  CCL: { first: '05:30', last: '23:59' },
-  DTL: { first: '05:30', last: '23:59' },
-  TEL: { first: '05:30', last: '23:59' },
-};
-
 export const StationPopup = ({ stationCode, crowdLevel, onClose }: StationPopupProps) => {
   const badge = crowdLevel ? getCrowdBadge(crowdLevel) : null;
   const interchangeLines = INTERCHANGE_LINES[stationCode] || [];
@@ -34,7 +26,7 @@ export const StationPopup = ({ stationCode, crowdLevel, onClose }: StationPopupP
   const lineCode = stationCode.replace(/[0-9]/g, '').replace('EW', 'EWL').replace('NS', 'NSL')
     .replace('NE', 'NEL').replace('CC', 'CCL').replace('DT', 'DTL').replace('TE', 'TEL');
   const lineColor = getLineColor(lineCode);
-  const hours = OPERATING_HOURS[lineCode];
+  const hours = getTodayHours(lineCode);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4" onClick={onClose}>
