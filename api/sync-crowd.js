@@ -38,12 +38,24 @@ export default async function handler(req, res) {
         // 3. Alias Circle Line Extension stations from their interchange counterparts
         const dt16 = rows.find(r => r.station_code === 'DT16');
         const ns27 = rows.find(r => r.station_code === 'NS27');
+        const dt35 = rows.find(r => r.station_code === 'DT35');
 
         if (dt16) {
             rows.push({ station_code: 'CE1', crowd_level: dt16.crowd_level, updated_at: dt16.updated_at });
         }
         if (ns27) {
             rows.push({ station_code: 'CE2', crowd_level: ns27.crowd_level, updated_at: ns27.updated_at });
+        }
+
+        // CG1 (Expo) shares its physical station with DT35 — alias to DT35's crowd level
+        if (dt35) {
+            const cg1 = rows.find(r => r.station_code === 'CG1');
+            if (cg1) {
+                cg1.crowd_level = dt35.crowd_level;
+                cg1.updated_at = dt35.updated_at;
+            } else {
+                rows.push({ station_code: 'CG1', crowd_level: dt35.crowd_level, updated_at: dt35.updated_at });
+            }
         }
 
         const { error } = await supabase
