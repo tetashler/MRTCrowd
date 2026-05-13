@@ -51,6 +51,33 @@ export const getTodayHours = (lineCode: string, date: Date = new Date()): DayHou
   return isWeekend(date) ? line.weekend : line.weekday;
 };
 
+// CG (Changi Airport branch) shares EWL hours; CE (Marina Bay branch) shares CCL hours.
+const LINE_PREFIX_TO_CODE: Record<string, string> = {
+  NS: 'NSL', EW: 'EWL', NE: 'NEL', CC: 'CCL', DT: 'DTL', TE: 'TEL',
+  CG: 'EWL', CE: 'CCL',
+};
+
+export const lineCodeForStation = (stationCode: string): string | undefined => {
+  const prefix = stationCode.replace(/[0-9]/g, '');
+  return LINE_PREFIX_TO_CODE[prefix];
+};
+
+export const getStationHours = (stationCode: string, date: Date = new Date()): DayHours | undefined => {
+  const lineCode = lineCodeForStation(stationCode);
+  return lineCode ? getTodayHours(lineCode, date) : undefined;
+};
+
+const to12Hour = (hhmm: string): string => {
+  const [h, m] = hhmm.split(':').map(Number);
+  const period = h < 12 ? 'am' : 'pm';
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return m === 0 ? `${hour12}${period}` : `${hour12}:${String(m).padStart(2, '0')}${period}`;
+};
+
+export const formatHoursRange = (hours: DayHours): string => {
+  return `${to12Hour(hours.first)} – ${to12Hour(hours.last)}`;
+};
+
 const toMinutes = (hhmm: string): number => {
   const [h, m] = hhmm.split(':').map(Number);
   return h * 60 + m;
