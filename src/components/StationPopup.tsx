@@ -1,6 +1,6 @@
 import { X, Clock } from 'lucide-react';
 import { getStationName, getLineColor, INTERCHANGE_LINES } from '../data/stations';
-import { getTodayHours } from '../data/operatingHours';
+import { getStationHours, lineCodeForStation } from '../data/operatingHours';
 
 interface StationPopupProps {
   stationCode: string;
@@ -23,10 +23,9 @@ export const StationPopup = ({ stationCode, crowdLevel, onClose }: StationPopupP
   const badge = crowdLevel ? getCrowdBadge(crowdLevel) : null;
   const interchangeLines = INTERCHANGE_LINES[stationCode] || [];
 
-  const lineCode = stationCode.replace(/[0-9]/g, '').replace('EW', 'EWL').replace('NS', 'NSL')
-    .replace('NE', 'NEL').replace('CC', 'CCL').replace('DT', 'DTL').replace('TE', 'TEL');
+  const lineCode = lineCodeForStation(stationCode) ?? '';
   const lineColor = getLineColor(lineCode);
-  const hours = getTodayHours(lineCode);
+  const hours = getStationHours(stationCode);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4" onClick={onClose}>

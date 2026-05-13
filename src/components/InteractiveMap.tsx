@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react';
 import { STATIONS, type Station, type CrowdLevel } from '../data/mrtStations';
 import { useCrowdData } from '../hooks/useCrowdData';
+import { getStationHours, formatHoursRange } from '../data/operatingHours';
 import { CrowdIcon } from './CrowdIcon';
 
 const LINE_COLORS: Record<string, string> = {
@@ -155,7 +156,12 @@ export default function InteractiveMap() {
               <span style={{ color: '#ffffff' }}>{popup.station.crowd}</span>
             </div>
             )}
-            <div className="text-[11px]" style={{ color: '#d1d5db' }}>⏰ 5:30am – 12:00am</div>
+            {(() => {
+              const hours = getStationHours(popup.station.id);
+              return hours ? (
+                <div className="text-[11px]" style={{ color: '#d1d5db' }}>⏰ {formatHoursRange(hours)}</div>
+              ) : null;
+            })()}
           </div>
         );
       })()}

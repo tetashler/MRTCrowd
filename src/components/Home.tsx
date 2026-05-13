@@ -6,13 +6,13 @@ import { LineCard } from './LineCard';
 import { FavouriteStations } from './FavouriteStations';
 import InteractiveMap from './InteractiveMap';
 import { MRT_LINES, STATION_NAMES, getLineColor } from '../data/stations';
+import { lineCodeForStation } from '../data/operatingHours';
 import { useTheme } from '../context/ThemeContext';
 import { useView } from '../context/ViewContext';
 
 // Build a flat searchable list of all stations
 const ALL_STATIONS = Object.entries(STATION_NAMES).map(([code, name]) => {
-  const lineCode = code.replace(/[0-9]/g, '').replace('EW', 'EWL').replace('NS', 'NSL')
-    .replace('NE', 'NEL').replace('CC', 'CCL').replace('DT', 'DTL').replace('TE', 'TEL');
+  const lineCode = lineCodeForStation(code) ?? '';
   return { code, name, lineCode };
 });
 
